@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up — AI Pedagogy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand" target="_self">🎓 AI Pedagogy</a>
+        <div class="navbar-links">
+            <a href="{{ url_for('login') }}" target="_self">Sign In</a>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="card auth-card fade-in">
+            <h2>Create Account</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for cat, msg in messages %}
+            <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('signup') }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control"
+                        placeholder="Choose a username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                        placeholder="Create a password" required minlength="4">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+            <div class="auth-link">
+                Already have an account? <a href="{{ url_for('login') }}" target="_self">Sign in</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

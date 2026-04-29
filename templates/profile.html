@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — AI Pedagogy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand" target="_self">🎓 AI Pedagogy</a>
+        <div class="navbar-links">
+            <span style="color:var(--text-secondary);font-size:.9rem;">👤 {{ session.username }}</span>
+            <a href="{{ url_for('logout') }}" target="_self">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="card fade-in" style="max-width:700px;margin:2rem auto;">
+            <h2 class="text-center" style="margin-bottom:.5rem;font-size:1.5rem;">
+                ⚙️ Profile Settings
+            </h2>
+            <p class="text-center" style="color:var(--text-secondary);margin-bottom:2rem;">
+                Select your domain and learning level to personalize lessons.
+            </p>
+
+            <form method="POST" action="{{ url_for('profile') }}" id="profileForm">
+                <!-- Domain -->
+                <label style="font-weight:600;font-size:.95rem;display:block;margin-bottom:.5rem;">Domain</label>
+                <div class="selection-grid mb-3">
+                    <label class="selection-card" id="card-tech">
+                        <input type="radio" name="domain" value="tech" {% if user.domain=='tech' %}checked{% endif %}>
+                        <div class="icon">💻</div>
+                        <div class="label">Tech</div>
+                        <div class="desc">Software, AI, Data Science, Systems</div>
+                    </label>
+                    <label class="selection-card" id="card-nontech">
+                        <input type="radio" name="domain" value="non-tech" {% if user.domain=='non-tech' %}checked{%
+                            endif %}>
+                        <div class="icon">📚</div>
+                        <div class="label">Non-Tech</div>
+                        <div class="desc">Business, Science, Arts, Humanities</div>
+                    </label>
+                </div>
+
+                <!-- Level -->
+                <label style="font-weight:600;font-size:.95rem;display:block;margin-bottom:.5rem;">Level</label>
+                <div class="selection-grid mb-3">
+                    <label class="selection-card" id="card-basic">
+                        <input type="radio" name="level" value="basic" {% if user.level=='basic' %}checked{% endif %}>
+                        <div class="icon">🌱</div>
+                        <div class="label">Basic</div>
+                        <div class="desc">Beginner friendly</div>
+                    </label>
+                    <label class="selection-card" id="card-intermediate">
+                        <input type="radio" name="level" value="intermediate" {% if user.level=='intermediate'
+                            %}checked{% endif %}>
+                        <div class="icon">⚡</div>
+                        <div class="label">Intermediate</div>
+                        <div class="desc">Some prior knowledge</div>
+                    </label>
+                    <label class="selection-card" id="card-advanced">
+                        <input type="radio" name="level" value="advanced" {% if user.level=='advanced' %}checked{% endif
+                            %}>
+                        <div class="icon">🚀</div>
+                        <div class="label">Advanced</div>
+                        <div class="desc">Deep-dive content</div>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-2">Save & Continue →</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Highlight active selection cards
+        document.querySelectorAll('.selection-card input[type="radio"]').forEach(radio => {
+            function update() {
+                const name = radio.name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                    r.closest('.selection-card').classList.toggle('active', r.checked);
+                });
+            }
+            radio.addEventListener('change', update);
+            update();
+        });
+    </script>
+</body>
+
+</html>

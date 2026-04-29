@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics — AI Pedagogy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand">🎓 AI Pedagogy</a>
+        <div class="navbar-links">
+            <a href="{{ url_for('lesson_display') }}" target="_self">📖 Lesson</a>
+            <span style="color:var(--text-secondary);font-size:.9rem;">👤 {{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" target="_self">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="fade-in">
+            <h2 style="font-size:1.5rem;margin-bottom:1.5rem;">📊 Feedback Analytics</h2>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total }}</div>
+                    <div class="stat-label">Total Feedbacks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ avg_rating }}</div>
+                    <div class="stat-label">Avg Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {% if avg_rating >= 4 %}😊
+                        {% elif avg_rating >= 2.5 %}😐
+                        {% elif total > 0 %}😟
+                        {% else %}—{% endif %}
+                    </div>
+                    <div class="stat-label">Sentiment</div>
+                </div>
+            </div>
+
+            <!-- Rating Distribution (Chart.js) -->
+            {% if total > 0 %}
+            <div class="card mb-3">
+                <h3 style="font-size:1rem;margin-bottom:1.5rem;">Rating Distribution</h3>
+                <div style="max-width:300px;margin:0 auto;height:300px;">
+                    <canvas id="ratingsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Scripts for Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const ctx = document.getElementById('ratingsChart').getContext('2d');
+
+                    // Prepare data from Python Template
+                    const counts = [
+                        {{ rating_counts[5] | default(0) }},
+                    {{ rating_counts[4] | default(0) }},
+                    {{ rating_counts[3] | default(0) }},
+                    {{ rating_counts[2] | default(0) }},
+                    {{ rating_counts[1] | default(0) }}
+                    ];
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['5★', '4★', '3★', '2★', '1★'],
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: [
+                                '#10b981', // green
+                                '#00d4ff', // accent (blue)
+                                '#7c3aed', // purple
+                                '#f59e0b', // warning (orange)
+                                '#ef4444'  // danger (red)
+                            ],
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 2,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#a0a0b8',
+                                    padding: 20,
+                                    font: { size: 12, weight: '500' },
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(18, 18, 42, 0.9)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function (context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = Math.round((context.raw / total) * 100);
+                                        return `${context.label}: ${context.raw} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%',
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        }
+                    }
+                });
+                });
+            </script>
+            {% endif %}
+
+            <!-- Feedback Table -->
+            {% if feedbacks %}
+            <div class="card">
+                <h3 style="font-size:1rem;margin-bottom:1rem;">Feedback History</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Topic</th>
+                                <th>Rating</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in feedbacks %}
+                            <tr>
+                                <td>{{ f.topic }}</td>
+                                <td>{{ '★' * f.rating }}{{ '☆' * (5 - f.rating) }}</td>
+                                <td>{{ f.comment or '—' }}</td>
+                                <td style="white-space:nowrap;">{{ f.created_at.strftime('%Y-%m-%d %H:%M') if
+                                    f.created_at else '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="card text-center" style="padding:3rem;">
+                <p style="font-size:1.2rem;margin-bottom:.5rem;">📭 No feedback yet</p>
+                <p style="color:var(--text-secondary);">Generate a lesson and submit feedback to see analytics here.</p>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="btn-group mt-4">
+                <a href="{{ url_for('lesson_input') }}" class="btn btn-primary" target="_self">🆕 New Lesson</a>
+                <a href="{{ url_for('lesson_display') }}" class="btn btn-secondary" target="_self">← Back to Lesson</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger" target="_self">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

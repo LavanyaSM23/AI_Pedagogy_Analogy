@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback — AI Pedagogy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand">🎓 AI Pedagogy</a>
+        <div class="navbar-links">
+            <a href="{{ url_for('lesson_display') }}" target="_self">📖 Lesson</a>
+            <span style="color:var(--text-secondary);font-size:.9rem;">👤 {{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" target="_self">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="card fade-in" style="max-width:550px;margin:2rem auto;">
+            <h2 class="text-center" style="margin-bottom:.5rem;font-size:1.5rem;">
+                💬 Lesson Feedback
+            </h2>
+            <p class="text-center" style="color:var(--text-secondary);margin-bottom:1.5rem;">
+                {% if topic %}Rate the lesson on <strong>{{ topic }}</strong>{% else %}Rate the lesson{% endif %}
+            </p>
+
+            <form method="POST" action="{{ url_for('feedback') }}">
+                <!-- Star Rating -->
+                <div class="form-group text-center">
+                    <label style="margin-bottom:.75rem;display:block;">Rating</label>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5"><label for="star5"
+                            title="5 stars">★</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4"
+                            title="4 stars">★</label>
+                        <input type="radio" id="star3" name="rating" value="3" checked><label for="star3"
+                            title="3 stars">★</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2"
+                            title="2 stars">★</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1"
+                            title="1 star">★</label>
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div class="form-group">
+                    <label for="comment">Comments (optional)</label>
+                    <textarea id="comment" name="comment" class="form-control"
+                        placeholder="What did you like? What could be improved?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">✅ Submit Feedback</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{{ url_for('lesson_display') }}" class="btn btn-secondary" target="_self">← Back to Lesson</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

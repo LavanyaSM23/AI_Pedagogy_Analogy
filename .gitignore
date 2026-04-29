@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+pedagogy.db
+server.log
+.vscode/
+.env
+
+# Large AI model files (too big for GitHub - download separately)
+models/*.gguf
+models/.cache/

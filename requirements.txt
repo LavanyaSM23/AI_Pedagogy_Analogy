@@ -1,0 +1,10 @@
+flask
+werkzeug
+llama-cpp-python
+huggingface-hub
+flask-sqlalchemy
+flask-login
+
+# For GPU acceleration (Intel Iris Xe via Vulkan), reinstall with:
+# pip install llama-cpp-python --force-reinstall --no-cache-dir -C cmake.args="-DGGML_VULKAN=ON"
+# Requires: Visual Studio Build Tools + Vulkan SDK

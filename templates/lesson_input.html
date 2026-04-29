@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Lesson — AI Pedagogy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand">🎓 AI Pedagogy</a>
+        <div class="navbar-links">
+            <a href="{{ url_for('profile') }}">⚙️ Profile</a>
+            <span style="color:var(--text-secondary);font-size:.9rem;">👤 {{ session.username }}</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="spinner-text">Generating your lesson with AI...</div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- GPU Status Badge -->
+        <div class="text-center" style="margin-bottom:1rem;">
+            <div id="gpuBadge" class="lesson-badge"
+                style="display:inline-flex;gap:.5rem;padding:.4rem 1rem;font-size:.8rem;opacity:0;transition:opacity .5s;">
+                <span id="gpuIcon">⏳</span>
+                <span id="gpuText">Detecting acceleration...</span>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="max-width:600px;margin:2rem auto;">
+            <h2 class="text-center" style="margin-bottom:.5rem;font-size:1.5rem;">
+                📝 What would you like to learn?
+            </h2>
+            <p class="text-center" style="color:var(--text-secondary);margin-bottom:2rem;">
+                Enter a topic and we'll generate a personalized lesson with analogies.
+            </p>
+
+            <form method="POST" action="{{ url_for('generate') }}" id="lessonForm">
+                <div class="form-group">
+                    <label for="topic">Topic</label>
+                    <input type="text" id="topic" name="topic" class="form-control"
+                        placeholder="e.g., Neural Networks, Supply Chain, Photosynthesis..." required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="generateBtn">
+                    🚀 Generate Lesson
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">← Back to Profile Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show loading spinner on form submit
+        document.getElementById('lessonForm').addEventListener('submit', function () {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('generateBtn').disabled = true;
+        });
+
+        // Fetch GPU/acceleration status
+        fetch('/gpu-status')
+            .then(r => r.json())
+            .then(data => {
+                const badge = document.getElementById('gpuBadge');
+                const icon = document.getElementById('gpuIcon');
+                const text = document.getElementById('gpuText');
+                if (data.gpu_offload) {
+                    icon.textContent = '🔥';
+                    text.textContent = `GPU Accelerated — ${data.backend}`;
+                    badge.style.borderColor = 'var(--success)';
+                } else {
+                    icon.textContent = '🧠';
+                    text.textContent = `${data.backend} — ${data.cpu_threads} threads`;
+                    badge.style.borderColor = 'var(--accent)';
+                }
+                badge.style.opacity = '1';
+            })
+            .catch(() => {
+                document.getElementById('gpuBadge').style.display = 'none';
+            });
+    </script>
+</body>
+
+</html>
