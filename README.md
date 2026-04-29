@@ -21,6 +21,7 @@ Make sure you have the following installed:
 - Python 3.10+ — https://www.python.org/downloads/
 - pip (comes with Python)
 - Git — https://git-scm.com/
+- SQLite 3 — https://www.sqlite.org/download.html (usually pre-installed; bundled with Python 3.4+, no separate install needed in most cases)
 
 ---
 
